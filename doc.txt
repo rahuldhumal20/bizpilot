@@ -1,48 +1,61 @@
 # BizPilot – AI Business Consultant
-## Project Scope & Software Requirements Specification (SRS)
+## Software Requirements Specification (SRS) and Project Documentation
 
-**Document Version:** 1.0  
-**Project Type:** AI-powered Business Analysis and Recommendation System  
-**Project Status:** MVP Development  
-**Primary Goal:** Complete a functional and stable MVP before introducing improvements.
+**Document Version:** 1.1  
+**Project Type:** AI-Powered Business Analysis and Recommendation System  
+**Development Stage:** MVP Implementation and Finalization  
+**Architecture:** React + FastAPI + LangGraph  
+**LLM Provider:** Groq
 
 ---
 
-# 1. Project Overview
+# 1. Executive Summary
 
-BizPilot is an AI-powered business consulting application designed to help small businesses and startups understand their business problems and identify practical technology-based solutions.
+BizPilot is an AI-powered business consulting application designed to help small businesses and startups understand operational challenges and identify practical solutions.
 
-Users provide their business details, describe their challenges, and specify their available budget. BizPilot processes this information through a sequential workflow of five specialized AI agents.
+Users provide information about their business, describe their problems, and specify their available budget. BizPilot processes the information through five specialized AI agents coordinated using LangGraph.
 
-The system generates a structured business consulting report containing business analysis, proposed solutions, cost estimates, an implementation roadmap, and a final review.
+A supporting Python-based financial validation component checks the financial estimates before the Project Planner generates an implementation roadmap.
 
-The application uses LangGraph to coordinate the agents, FastAPI for backend APIs, React for the frontend, and Groq for LLM inference.
+The application produces a structured Business Intelligence Report containing:
+
+1. Business Analysis
+2. Solution Architecture
+3. Cost Analysis
+4. Financial Validation
+5. Project Roadmap
+6. Critic Review
+
+The primary objective is to demonstrate how Generative AI and agent orchestration can support practical business problem-solving.
 
 # 2. Problem Statement
 
-Small businesses frequently face operational challenges such as:
+Small businesses frequently experience operational difficulties such as:
 
-- Manual business processes.
-- Inefficient customer management.
-- Poor appointment or order management.
-- Lack of digital tools.
-- Difficulty estimating implementation costs.
-- Lack of technical knowledge to select suitable solutions.
-- Difficulty planning technology implementation.
+- Manual record-keeping and repetitive administrative tasks.
+- Inefficient inventory, order, and customer management.
+- Lack of suitable digital tools.
+- Difficulty selecting appropriate technology solutions.
+- Uncertainty about implementation costs.
+- Limited technical knowledge.
+- Difficulty planning technology adoption.
 
-Hiring professional consultants or technical experts may be expensive or inaccessible for smaller businesses.
+Professional consulting services may be expensive or inaccessible to smaller businesses.
 
-BizPilot aims to provide an initial AI-assisted business assessment and practical recommendations through a simple web application.
+BizPilot addresses this problem by providing an AI-assisted initial business assessment and structured recommendations through a web application.
 
 # 3. Project Objectives
 
+The main objectives are:
+
 1. Understand business problems using AI.
-2. Identify root causes of operational challenges.
-3. Recommend suitable technology-based solutions.
+2. Identify operational challenges and their likely root causes.
+3. Recommend practical solutions based on business requirements.
 4. Estimate initial and recurring implementation costs.
-5. Generate a practical implementation roadmap.
-6. Review the proposed solution for quality and feasibility.
-7. Present the complete analysis in a structured dashboard.
+5. Validate financial estimates using Python.
+6. Generate a structured implementation roadmap.
+7. Review the proposal for quality, feasibility, and risks.
+8. Present the results through a user-friendly dashboard.
 
 # 4. Target Users
 
@@ -50,305 +63,321 @@ BizPilot aims to provide an initial AI-assisted business assessment and practica
 - Startup founders.
 - Entrepreneurs.
 - Local service providers.
-- Business operators looking to digitize manual processes.
+- Business operators interested in digital transformation.
 
-# 5. Functional Scope
-
-The following features define the agreed MVP. This scope is frozen until the MVP is completed.
+# 5. Functional Requirements
 
 ## 5.1 Business Information Input
 
-Users can enter:
+The application accepts the following information:
 
-- Business name.
-- Industry.
-- Industry domain.
-- Business description.
-- Business problem.
-- Available budget.
-- Currency.
-- Budget scope.
-- Business size.
+| Field | Description |
+|---|---|
+| Business Name | Name of the business |
+| Industry | Business industry |
+| Industry Domain | Specific business category |
+| Business Description | Overview of existing operations |
+| Business Problem | Main challenge requiring a solution |
+| Budget Amount | Available implementation budget |
+| Currency | INR, USD, EUR or GBP |
+| Budget Scope | Initial-only or first-year total |
+| Business Size | Startup, Small Business, Medium Business or Enterprise |
 
-Supported industry domains:
+Supported industry domains include retail, beauty, food, healthcare, education, manufacturing, water, agriculture, hospitality, logistics, professional services, and other.
 
-1. Retail
-2. Beauty and Wellness
-3. Food
-4. Healthcare
-5. Education
-6. Manufacturing
-7. Water
-8. Agriculture
-9. Hospitality
-10. Logistics
-11. Professional Services
-12. Other
+## 5.2 Business Analysis
 
-## 5.2 AI Business Analysis
-
-The system analyzes the submitted business information and identifies:
+The Business Analyst identifies:
 
 - Business overview.
-- Existing operational challenges.
+- Operational problems.
 - Root causes.
 - Business impact.
-- Improvement opportunities.
-- Assumptions and missing information.
-- Recommended next steps.
+- Customer experience issues.
+- Automation opportunities.
+- Assumptions.
+- Missing information.
 
-## 5.3 AI Solution Recommendations
+The analysis must distinguish user-provided facts from assumptions and avoid inventing business information.
 
-The system recommends suitable solutions based on:
+## 5.3 Solution Architecture
 
-- Identified business problems.
-- Business size.
+The Solution Architect designs a practical solution based on:
+
+- Business requirements.
+- Identified problems.
 - Industry.
+- Business size.
 - Available budget.
-- Operational requirements.
+- Operational constraints.
 
-Recommendations should explain what the solution does and how it addresses the identified problem.
+The output includes:
 
-Unverified product prices, features, and vendor claims must not be presented as confirmed facts.
+- Requirement understanding.
+- Recommended solution.
+- Required resources.
+- Alternative solutions.
+- Budget considerations.
+- Implementation requirements.
+- Risks and limitations.
+- Missing information.
+
+Vendor prices and product capabilities must be treated as unverified unless supported by reliable information.
 
 ## 5.4 Cost Analysis
 
 The Cost Analyst estimates:
 
 - Initial implementation cost.
-- Monthly operating cost.
-- Annual gross benefit, when sufficient information is available.
+- Monthly operating expenses.
+- Annual gross benefits, when sufficient information exists.
 - Financial assumptions.
 - Financial risks.
 
-Estimates must be presented as ranges where appropriate.
+Costs should be expressed as reasonable ranges where appropriate.
 
-If annual benefits cannot be reliably estimated, the system must identify them as unknown rather than inventing values.
+Unknown benefits must remain unknown. The system must not invent revenue, savings, or ROI figures.
 
 ## 5.5 Financial Validation
 
-A Python-based financial validator checks the structured financial information.
+A Python-based financial validation component checks the structured financial estimates.
 
 Its responsibilities include:
 
 - Checking required financial fields.
 - Validating numeric values.
-- Checking minimum and maximum cost ranges.
-- Checking currency consistency.
-- Comparing estimates against the available budget.
-- Supporting initial-only and first-year budget comparisons.
-- Calculating financial indicators only when sufficient data is available.
+- Checking minimum and maximum ranges.
+- Verifying currency consistency.
+- Comparing estimated costs with the available budget.
+- Handling initial-only and first-year-total budget scopes.
+- Calculating financial indicators only when sufficient information is available.
 
-Possible validation statuses:
+Possible statuses include:
 
 - Passed
 - Needs Review
 - Failed
 - Not Validated
 
-The validator is a supporting backend utility, not an additional specialist AI agent.
+The financial validator is a supporting Python component, not a sixth AI agent.
 
 ## 5.6 Project Planning
 
-The Project Planner generates a practical implementation roadmap containing:
+The Project Planner creates an implementation roadmap with three phases:
 
-- Implementation phases.
-- Tasks.
-- Expected deliverables.
+**Phase 1 – MVP / Initial Setup**
+- Foundational setup.
+- Required resources.
+- Initial configuration.
 - Dependencies.
-- Testing activities.
-- Rollout considerations.
-- Training requirements.
-- Success metrics.
-- Potential risks.
+- Deliverables.
 
-The roadmap must be consistent with the proposed solution and available financial estimates.
+**Phase 2 – Core Implementation**
+- Main implementation tasks.
+- Integration and configuration.
+- Operational workflow.
+- Dependencies.
+- Deliverables.
+
+**Phase 3 – Testing and Rollout**
+- Functional testing.
+- User acceptance testing.
+- Training.
+- Deployment or rollout.
+- Handover and monitoring.
+
+The roadmap also includes key dependencies, testing strategy, success metrics, risks, and information required before implementation.
+
+The roadmap must remain consistent with the proposed solution and financial estimates.
 
 ## 5.7 Critic Review
 
-The Critic Agent reviews the overall proposal.
+The Critic Agent reviews the complete proposal across five dimensions:
 
-Review areas:
-
-- Problem understanding.
-- Solution suitability.
-- Financial feasibility.
-- Implementation feasibility.
-- Risk and compliance considerations.
+1. Problem Understanding
+2. Solution Suitability
+3. Financial Feasibility
+4. Implementation Feasibility
+5. Risk and Compliance Management
 
 The output includes:
 
-- Review comments.
 - Quality score.
-- Approval status.
-- Financial validation status.
+- Category scores.
+- Approval recommendation.
+- Business strengths.
+- Financial concerns.
+- Technical concerns.
+- Missing information.
+- Critical risks.
 
-Possible approval statuses:
+Possible recommendations include Approved, Conditional Approval, Rejected, and Manual Review Required.
 
-- Approved
-- Conditional Approval
-- Rejected
-- Manual Review Required
+The Critic's assessment is an AI-generated review, not a guarantee of actual business feasibility.
 
-## 5.8 Final Business Report
+## 5.8 Final Business Intelligence Report
 
-The application combines the outputs into one final report containing:
+The backend combines the agent outputs into one report.
+
+The report contains:
 
 1. Business information.
-2. Business analysis.
-3. Solution architecture.
-4. Cost analysis.
-5. Financial validation.
-6. Project roadmap.
-7. Critic review.
-8. Overall quality status.
+2. Business Analysis.
+3. Solution Architecture.
+4. Cost Analysis.
+5. Financial Validation.
+6. Project Roadmap.
+7. Critic Review.
+8. Overall assessment.
 
-## 5.9 Dashboard
+## 5.9 Frontend Dashboard
 
-The React frontend provides:
+The React application provides:
 
 - Business information form.
 - Industry and business-size selection.
 - Budget and currency inputs.
-- Budget scope selection.
-- Analysis execution.
-- Agent execution progress.
-- Final report display.
-- Agent completion status.
+- Budget-scope selection.
+- Analysis submission.
+- Agent execution status.
+- Structured report display.
+- Markdown formatting.
 
-The dashboard must clearly show five specialist agents as completed when their execution succeeds. The financial validator must not be counted as a sixth specialist agent.
+The dashboard displays five specialist AI agents. The financial validator is not counted as a sixth agent.
 
 # 6. AI Agent Architecture
 
-BizPilot uses five specialist AI agents coordinated through LangGraph.
+BizPilot contains five specialist AI agents.
 
 ## Agent 1 – Business Analyst
 
-**Responsibility:** Understand the business and identify its problems.
+**Purpose:** Understand the business and identify its operational challenges.
 
-Input:
+**Input:**
+- Business information.
 - Business description.
 - Business problem.
-- Industry.
-- Business size.
-- Industry context.
+- Industry and business size.
 
-Output:
+**Output:**
 - Business overview.
-- Problems.
+- Operational problems.
 - Root causes.
-- Business impact.
-- Opportunities.
-- Assumptions.
-- Missing information.
+- Customer impact.
+- Automation opportunities.
+- Assumptions and missing information.
 
 ## Agent 2 – Solution Architect
 
-**Responsibility:** Recommend appropriate solutions.
+**Purpose:** Design practical solutions for the identified business problems.
 
-Input:
+**Input:**
 - Business information.
 - Business analysis.
-- Budget.
-- Industry context.
+- Industry guidance.
+- Budget information.
 
-Output:
-- Proposed solution.
-- Recommended technology.
-- Solution explanation.
-- Expected benefits.
-- Assumptions and limitations.
+**Output:**
+- Recommended solution.
+- Required resources.
+- Alternatives.
+- Budget considerations.
+- Risks and limitations.
 
 ## Agent 3 – Cost Analyst
 
-**Responsibility:** Estimate the financial requirements.
+**Purpose:** Estimate the financial requirements of the recommended solution.
 
-Input:
+**Input:**
 - Business information.
 - Proposed solution.
-- Budget.
+- Budget information.
 
-Output:
+**Output:**
 - Initial cost range.
-- Monthly operating cost range.
-- Annual benefit estimate, if supportable.
-- Financial assumptions.
+- Monthly operating cost.
+- Annual gross benefit, if supportable.
+- Assumptions.
 - Financial risks.
 - Structured financial data.
 
 ## Supporting Component – Financial Validator
 
-**Responsibility:** Validate financial estimates using Python.
+**Purpose:** Perform programmatic validation of financial estimates.
 
-Input:
+**Input:**
 - Structured financial data.
-- Available budget.
+- Budget amount.
 - Currency.
 - Budget scope.
 
-Output:
+**Output:**
 - Validation status.
 - Issues.
 - Warnings.
-- Financial calculations, where possible.
+- Calculations, where possible.
 
 ## Agent 4 – Project Planner
 
-**Responsibility:** Prepare an implementation roadmap.
+**Purpose:** Convert the proposed solution into an implementation roadmap.
 
-Input:
+**Input:**
 - Business analysis.
-- Proposed solution.
+- Solution architecture.
 - Cost analysis.
 - Financial validation.
 
-Output:
-- Implementation phases.
+**Output:**
+- Three implementation phases.
 - Tasks.
 - Dependencies.
 - Deliverables.
-- Testing and rollout plan.
+- Testing strategy.
+- Training and rollout plan.
 - Risks and success metrics.
 
 ## Agent 5 – Critic Agent
 
-**Responsibility:** Review the complete proposal.
+**Purpose:** Review the complete business proposal.
 
-Input:
+**Input:**
 - Business analysis.
 - Solution architecture.
 - Cost analysis.
 - Financial validation.
 - Project roadmap.
 
-Output:
-- Review comments.
+**Output:**
 - Quality score.
-- Approval status.
-- Overall quality status.
+- Category scores.
+- Approval recommendation.
+- Strengths.
+- Concerns.
+- Missing information.
+- Critical risks.
 
 # 7. System Workflow
 
-The MVP uses a sequential LangGraph workflow.
+BizPilot follows a sequential LangGraph workflow.
 
 1. User submits business information.
 2. FastAPI validates the request.
 3. Industry context is loaded.
-4. Business Analyst analyzes the business.
-5. Solution Architect recommends a solution.
-6. Cost Analyst estimates costs.
-7. Financial Validator checks the estimates.
-8. Project Planner generates the roadmap.
-9. Critic Agent reviews the proposal.
+4. Business Analyst performs the analysis.
+5. Solution Architect designs the solution.
+6. Cost Analyst estimates financial requirements.
+7. Financial Validator checks the financial data.
+8. Project Planner creates the implementation roadmap.
+9. Critic Agent reviews the complete proposal.
 10. Final report is compiled.
-11. FastAPI returns the report.
-12. React displays the results.
+11. FastAPI returns the result.
+12. React displays the report.
 
 **Workflow:**
 
 User Input → FastAPI → Business Analyst → Solution Architect → Cost Analyst → Financial Validator → Project Planner → Critic Agent → Final Report → Dashboard
 
-LangGraph manages the execution and passing of shared state between workflow nodes.
+LangGraph manages workflow execution and the passing of shared state between nodes.
 
 # 8. Technology Stack
 
@@ -361,39 +390,55 @@ LangGraph manages the execution and passing of shared state between workflow nod
 | Backend | Python | Application logic |
 | API Framework | FastAPI | REST API |
 | Validation | Pydantic | Request validation |
-| Agent Framework | LangChain | LLM integration |
-| Orchestration | LangGraph | Agent workflow |
-| LLM Provider | Groq | Language model inference |
-| Configuration | python-dotenv | Environment variables |
-| Database | MongoDB Atlas | Optional future history storage |
-| Frontend Hosting | Vercel | Future deployment |
-| Backend Hosting | Render | Future deployment |
+| LLM Integration | LangChain | Model integration |
+| Orchestration | LangGraph | Sequential agent workflow |
+| LLM Provider | Groq | Model inference |
+| Report Rendering | React Markdown | Markdown rendering |
+| Markdown Extension | Remark GFM | Tables and GitHub Flavored Markdown |
+| Configuration | python-dotenv | Environment configuration |
 
 # 9. System Architecture
 
-The application follows a frontend-backend architecture.
+The application uses a frontend-backend architecture with a separate AI processing workflow.
 
-**Frontend Layer**
-- Collects user information.
-- Sends requests to backend APIs.
-- Displays execution status.
-- Displays the final business report.
+## 9.1 Frontend Layer
 
-**Backend Layer**
-- Exposes FastAPI endpoints.
-- Validates input.
-- Loads industry context.
-- Executes the LangGraph workflow.
-- Compiles the final report.
+Responsibilities:
 
-**AI Processing Layer**
-- Contains five specialist agents.
-- Uses Groq for LLM responses.
-- Passes outputs through shared LangGraph state.
+- Collect business information.
+- Submit requests to the backend.
+- Display analysis status.
+- Present the final report.
+- Display agent execution logs.
 
-**Validation Layer**
-- Performs Python-based financial checks.
-- Returns validation results to the workflow.
+## 9.2 Backend Layer
+
+Responsibilities:
+
+- Expose REST API endpoints.
+- Validate incoming requests.
+- Load relevant industry context.
+- Execute the LangGraph workflow.
+- Compile the final report.
+- Return results to the frontend.
+
+## 9.3 AI Processing Layer
+
+Responsibilities:
+
+- Execute the five specialist AI agents.
+- Generate structured business recommendations.
+- Process agent outputs using shared workflow state.
+- Produce the final proposal.
+
+## 9.4 Financial Validation Layer
+
+Responsibilities:
+
+- Validate financial fields.
+- Check budget feasibility.
+- Identify inconsistencies.
+- Calculate supported financial indicators.
 
 # 10. API Requirements
 
@@ -404,19 +449,19 @@ The application follows a frontend-backend architecture.
 
 ### Request Fields
 
-| Field | Type | Description |
-|---|---|---|
-| business_name | String | Name of the business |
-| industry | String | Industry name |
-| industry_domain | String | Supported domain |
-| business_description | String | Business overview |
-| business_problem | String | Problem to solve |
-| budget_amount | Number | Available budget |
-| currency | String | INR, USD, EUR or GBP |
-| budget_scope | String | initial_only or first_year_total |
-| business_size | String | Business size |
+| Field | Type |
+|---|---|
+| business_name | String |
+| industry | String |
+| industry_domain | String |
+| business_description | String |
+| business_problem | String |
+| budget_amount | Number |
+| currency | String |
+| budget_scope | String |
+| business_size | String |
 
-### Successful Response
+### Response
 
 The endpoint returns:
 
@@ -427,46 +472,53 @@ The endpoint returns:
 
 ### Error Handling
 
-The backend should return an appropriate HTTP error when:
+The application should provide understandable errors when:
 
 - Request validation fails.
-- Required input is missing.
-- Agent execution fails.
-- The workflow cannot generate a report.
+- Required information is missing.
+- An agent fails.
+- LLM inference fails.
+- The workflow cannot produce a complete report.
 
-Error responses should not expose API keys or other sensitive configuration.
+Errors must not expose API keys or sensitive configuration.
 
 # 11. Non-Functional Requirements
 
 ## Performance
-- The application should complete an analysis without unnecessary processing.
-- LLM prompts should remain reasonably concise.
-- Long-running analysis should provide clear progress feedback where supported.
+
+- Keep LLM prompts concise.
+- Avoid unnecessary workflow execution.
+- Handle model output limits.
+- Provide clear execution status.
 
 ## Reliability
-- Agent failures should produce understandable errors.
-- Missing financial information must not cause fabricated calculations.
-- The application should avoid returning incomplete reports as successful results.
+
+- Handle missing financial information safely.
+- Avoid fabricated financial calculations.
+- Identify incomplete or failed agent outputs.
+- Avoid presenting incomplete reports as successful results.
 
 ## Security
-- Groq API keys must remain in backend environment variables.
-- `.env` files must not be committed to GitHub.
-- Backend configuration must not be exposed to the frontend.
+
+- Keep Groq API keys in backend environment variables.
+- Exclude `.env` files from Git.
+- Never expose API credentials in frontend code.
+- Do not return sensitive configuration in API responses.
 
 ## Usability
-- The form should be easy to understand.
-- Validation errors should be readable.
-- Reports should be organized into clear sections.
-- Users should understand the financial assumptions and limitations.
+
+- Provide a clear business information form.
+- Display readable validation messages.
+- Organize reports into meaningful sections.
+- Clearly explain assumptions and limitations.
 
 ## Maintainability
-- Agents should remain in separate modules.
-- API routes, graph workflow, domain rules and validators should remain organized.
-- Avoid unnecessary architectural layers.
+
+- Keep agent modules separate.
+- Maintain the existing API, workflow, domain, and validator structure.
+- Avoid unnecessary architectural complexity.
 
 # 12. Project Folder Structure
-
-The current project organization is:
 
 ```text
 bizpilot/
@@ -475,10 +527,8 @@ bizpilot/
 │   ├── app/
 │   │   ├── main.py
 │   │   ├── config.py
-│   │   │
 │   │   ├── api/
 │   │   │   └── routes.py
-│   │   │
 │   │   ├── agents/
 │   │   │   ├── business_analyst.py
 │   │   │   ├── solution_architect.py
@@ -486,46 +536,45 @@ bizpilot/
 │   │   │   ├── project_planner.py
 │   │   │   ├── critic.py
 │   │   │   └── financial_validator_agent.py
-│   │   │
 │   │   ├── graph/
 │   │   │   ├── state.py
 │   │   │   └── workflow.py
-│   │   │
 │   │   ├── domain/
 │   │   │   └── industry_rules.py
-│   │   │
 │   │   └── validators/
 │   │       └── financial_validator.py
-│   │
-│   ├── .env
-│   └── requirements.txt
+│   ├── requirements.txt
+│   ├── .env.example
+│   └── .gitignore
 │
-└── frontend/
-    ├── src/
-    │   ├── App.jsx
-    │   ├── main.jsx
-    │   └── ...
-    │
-    ├── package.json
-    └── vite.config.js
+├── frontend/
+│   ├── src/
+│   │   ├── App.jsx
+│   │   ├── main.jsx
+│   │   └── ...
+│   ├── package.json
+│   └── .gitignore
+│
+├── .gitignore
+└── README.md
 ```
 
-This documents the current structure; it is not a requirement to restructure existing files.
+This structure documents the existing architecture and does not require a restructuring exercise.
 
-# 13. Scope Exclusions – Not Included in the MVP
+# 13. Scope Exclusions
 
-To prevent unnecessary complexity, the following features are explicitly postponed:
+The following features are outside the agreed MVP:
 
 - Additional AI agents.
 - Complex agent revision loops.
 - Multi-agent debate systems.
-- Automatic re-planning and repeated critique cycles.
+- Automatic re-planning.
 - Advanced scoring engines.
 - External vendor price integrations.
 - Live software product comparisons.
 - Payment gateway integration.
-- WhatsApp or email automation.
-- User login and role-based access.
+- WhatsApp and email automation.
+- User authentication and role-based access.
 - Multi-user organization management.
 - MongoDB-based report history.
 - PDF export.
@@ -533,50 +582,129 @@ To prevent unnecessary complexity, the following features are explicitly postpon
 - Mobile application.
 - Production-scale monitoring.
 
-These features may be considered after the MVP is complete. They are not current development requirements.
+These features may be considered after the MVP is complete. They are not current requirements.
 
-# 14. MVP Completion Criteria
+# 14. Current Implementation Status
 
-BizPilot will be considered functionally complete when all the following criteria are satisfied:
+The following status reflects the development work completed so far.
 
-- [ ] Frontend starts successfully.
-- [ ] Backend starts successfully.
-- [ ] Frontend can communicate with the backend.
-- [ ] Business information form works correctly.
-- [ ] All required fields are validated.
-- [ ] All five specialist agents execute successfully.
-- [ ] LangGraph runs the correct sequential workflow.
-- [ ] Financial Validator produces the expected result.
-- [ ] Final report is compiled successfully.
-- [ ] Report sections display correctly in the dashboard.
-- [ ] Agent completion count displays correctly as five out of five.
-- [ ] Invalid input produces readable errors.
-- [ ] Missing financial information is handled safely.
-- [ ] At least three different business scenarios are tested.
-- [ ] No API keys or secrets are exposed.
-- [ ] Project setup and execution instructions are documented.
+| Component | Current Status |
+|---|---|
+| React + Vite frontend | Implemented |
+| FastAPI backend | Implemented |
+| Business information form | Implemented |
+| Five specialist agents | Implemented |
+| LangGraph sequential workflow | Implemented |
+| Financial Validator | Implemented |
+| Final report generation | Implemented |
+| Markdown report rendering | Implemented |
+| Agent execution logs | Implemented |
+| Business scenario testing | Performed |
+| Git repository setup | In progress / verify push |
+| Production deployment | Pending |
 
-# 15. Development Plan
+## 14.1 Known Limitations
 
-| Phase | Work | Completion Goal |
+Testing has identified areas that still need attention:
+
+1. Agent responses may be incomplete when model output limits are reached.
+2. Business Analysis and Solution Architecture can make unverified vendor or product claims.
+3. Cost estimates can differ between agents.
+4. Annual financial benefits may be unavailable without business data.
+5. The Critic can identify inconsistencies but does not automatically correct them.
+6. Vendor pricing, product features, and regulatory requirements require independent verification.
+7. Production deployment and live environment testing have not yet been confirmed.
+
+These are finalization issues, not reasons to expand the architecture.
+
+# 15. MVP Completion Checklist
+
+## Application
+
+- [x] React frontend created.
+- [x] FastAPI backend created.
+- [x] Frontend and backend integrated locally.
+- [x] Business information form implemented.
+- [x] Markdown report rendering implemented.
+
+## AI Workflow
+
+- [x] Business Analyst implemented.
+- [x] Solution Architect implemented.
+- [x] Cost Analyst implemented.
+- [x] Project Planner implemented.
+- [x] Critic Agent implemented.
+- [x] LangGraph workflow implemented.
+- [x] Financial Validator implemented.
+
+## Testing and Quality
+
+- [x] Multiple business scenarios tested.
+- [x] Agent execution logs tested.
+- [x] Financial validation tested.
+- [ ] Final regression test completed.
+- [ ] Report completeness verified across final test cases.
+- [ ] Cross-agent financial consistency reviewed.
+- [ ] API error handling verified.
+- [ ] Agent count confirmed as five out of five.
+
+## GitHub and Deployment
+
+- [x] Backend `.gitignore` created.
+- [x] Frontend `.gitignore` checked/created.
+- [ ] Initial GitHub push verified.
+- [ ] README added to repository.
+- [ ] Environment example files added.
+- [ ] Production backend deployed.
+- [ ] Production frontend deployed.
+- [ ] Production API connection verified.
+- [ ] Live application tested.
+
+# 16. Remaining Development Plan
+
+The remaining work is finalization, not feature development.
+
+| Step | Task | Expected Outcome |
 |---|---|---|
-| 1 | Existing backend | All agents and workflow work |
-| 2 | Existing frontend | Form and report display work |
-| 3 | Integration | Frontend and backend work together |
-| 4 | Testing | Test different business scenarios |
-| 5 | Finalization | Fix bugs and document setup |
-| 6 | Deployment | Deploy the completed MVP |
+| 1 | Complete README and project documentation | Professional project documentation |
+| 2 | Verify GitHub repository | Source code safely published |
+| 3 | Complete final regression testing | Stable end-to-end workflow |
+| 4 | Verify API error handling | Readable errors and safe failures |
+| 5 | Deploy FastAPI backend | Public backend endpoint |
+| 6 | Deploy React frontend | Public application |
+| 7 | Test production workflow | Working live demonstration |
 
-The phases are completion milestones, not additional feature-development cycles.
+# 17. Future Enhancements
 
-# 16. Final Project Definition
+Only after successful MVP completion, possible future improvements include:
 
-BizPilot is a LangGraph-based AI business consulting application that uses five specialized AI agents to analyze business challenges, recommend technology solutions, estimate costs, prepare implementation roadmaps, and review proposal quality.
+- Persistent report history.
+- PDF report generation.
+- User authentication.
+- Verified vendor pricing integrations.
+- Advanced financial analytics.
+- Report comparison.
+- Multi-business management.
 
-A Python financial validation component checks the financial estimates before the final report is generated.
+These are future possibilities, not commitments or part of the current MVP.
 
-The project focuses on demonstrating practical applications of Generative AI, agent orchestration, backend API development, frontend integration, structured output generation, and business problem-solving.
+# 18. Final Project Definition
 
-**Final Development Principle:**
+BizPilot is a LangGraph-based AI business consulting application that uses five specialized AI agents to analyze business challenges, recommend practical solutions, estimate implementation costs, generate project roadmaps, and review proposal quality.
 
-Complete the agreed MVP first. Fix existing functionality when necessary. Do not introduce new features or architectural complexity until the current project works reliably from user input to final report.
+A Python-based financial validation component checks financial estimates before the final business intelligence report is generated.
+
+The application demonstrates practical use of:
+
+- Generative AI.
+- Multi-agent orchestration.
+- LangChain and LangGraph.
+- Python and FastAPI.
+- React frontend development.
+- Structured financial validation.
+- Business problem analysis.
+- End-to-end application integration.
+
+**Final Development Principle**
+
+Complete the agreed MVP first. Fix existing functionality when necessary. Do not introduce new features or unnecessary architectural complexity before the application works reliably from user input to final report.
