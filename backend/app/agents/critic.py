@@ -5,6 +5,20 @@ from app.config import llm
 from app.graph.state import BizPilotState
 
 
+def get_response_text(content):
+    if isinstance(content, str):
+        return content.strip()
+
+    if isinstance(content, list):
+        return "\n".join(
+            item.get("text", "")
+            for item in content
+            if isinstance(item, dict) and item.get("type") == "text"
+        ).strip()
+
+    return str(content)
+
+
 def extract_score(review: str):
     """Extract the quality score from the critic response."""
 
@@ -38,16 +52,16 @@ def determine_status(score, validation_status):
     if validation_status == "failed":
         return "Rejected"
 
-    if validation_status == "not_validated":
+    if score < 50:
+        return "Rejected"
+
+    if validation_status != "passed":
         return "Conditional Approval"
 
-    if score >= 80 and validation_status == "passed":
+    if score >= 80:
         return "Approved"
 
-    if score >= 50:
-        return "Conditional Approval"
-
-    return "Rejected"
+    return "Conditional Approval"
 
 
 def review_solution(state: BizPilotState):
@@ -56,30 +70,46 @@ def review_solution(state: BizPilotState):
 
     business = str(
         state.get("business_analysis", {})
-    )[:900]
-
-    solution = str(
-        state.get("solution_architecture", {})
     )[:1100]
 
+    solution_data = state.get("solution_architecture", {})
+
+    solution = str(
+        solution_data.get("solution", solution_data)
+        if isinstance(solution_data, dict)
+        else solution_data
+    )[:2000]
+
+    cost_data = state.get("cost_analysis", {})
+
     cost = str(
-        state.get("cost_analysis", {})
-    )[:700]
+        cost_data.get("financial_analysis", cost_data)
+        if isinstance(cost_data, dict)
+        else cost_data
+    )[:1100]
 
     financial_validation = str(
         state.get("financial_validation", {})
-    )[:700]
+    )[:800]
+
+    roadmap_data = state.get("project_roadmap", {})
 
     roadmap = str(
-        state.get("project_roadmap", {})
-    )[:900]
+        roadmap_data.get("roadmap", roadmap_data)
+        if isinstance(roadmap_data, dict)
+        else roadmap_data
+    )[:1600]
 
-    budget = state.get("budget", "Not provided")
+    budget_amount = state.get("budget_amount", "Not provided")
+    currency = state.get("currency", "INR")
+    budget_scope = state.get("budget_scope", "initial_only")
 
     prompt = f"""
 You are an independent Senior Business Proposal Reviewer.
 
-Review the complete BizPilot proposal objectively.
+Evaluate the BizPilot proposal objectively and identify
+whether it is practical, financially reasonable and suitable
+for the customer's actual business problem.
 
 BUSINESS:
 {state.get("business_name")}
@@ -90,13 +120,16 @@ INDUSTRY:
 BUSINESS SIZE:
 {state.get("business_size")}
 
-AVAILABLE BUDGET:
-{budget}
+CUSTOMER BUDGET:
+{currency} {budget_amount}
+
+BUDGET COVERAGE:
+{budget_scope}
 
 BUSINESS ANALYSIS:
 {business}
 
-SOLUTION:
+SOLUTION ARCHITECTURE:
 {solution}
 
 COST ANALYSIS:
@@ -122,18 +155,23 @@ Calculate the weighted overall score.
 
 REVIEW RULES:
 
-1. Check whether the solution addresses the actual problem.
-2. Identify unsupported assumptions and missing information.
-3. Check whether costs respect the customer's budget scope.
-4. Consider the Python financial validation result.
-5. Do not claim unknown benefits are zero.
-6. Do not calculate or claim ROI if benefits are unknown.
-7. If financial validation failed, identify the problem.
-8. If financial validation is not_validated, state that
-   financial estimates are unverified.
-9. Do not treat estimated vendor pricing as verified quotations.
-10. Identify safety and regulatory requirements where applicable.
-11. Never approve a proposal solely because its score is high.
+1. Check whether the solution addresses the customer's actual problem.
+2. Check whether the recommended resources are consistent
+   across the solution, cost analysis and roadmap.
+3. Check whether the cost estimate covers the required resources.
+4. Check whether the budget scope has been respected.
+5. Consider the Python financial validation result.
+6. Identify unsupported assumptions and missing information.
+7. Do not treat estimates as verified vendor quotations.
+8. Do not treat unknown annual benefits as zero.
+9. Do not calculate or claim ROI when benefits are unknown.
+10. If financial validation failed, explain the problem.
+11. If financial validation is not validated or needs review,
+    state that financial estimates require confirmation.
+12. Identify relevant safety and regulatory concerns.
+13. Do not approve a proposal solely because its score is high.
+14. Do not invent facts or requirements.
+15. Keep the review concise and complete.
 
 OUTPUT FORMAT:
 
@@ -165,23 +203,12 @@ OUTPUT FORMAT:
 
 10. Final Verdict
 
-Be objective and concise.
-Do not invent facts.
+Use the weighted evaluation framework consistently.
+Return a complete review and do not stop mid-sentence.
 """
 
     response = llm.invoke(prompt)
-
-    review = response.content
-
-    if isinstance(review, list):
-        review = "\n".join(
-            item.get("text", "")
-            for item in review
-            if isinstance(item, dict)
-            and item.get("type") == "text"
-        )
-
-    review = str(review)[:2500]
+    review = get_response_text(response.content)
 
     validation = state.get(
         "financial_validation", {}

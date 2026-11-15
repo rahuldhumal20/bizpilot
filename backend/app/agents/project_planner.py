@@ -3,31 +3,47 @@ from app.config import llm
 from app.graph.state import BizPilotState
 
 
+def get_response_text(content):
+    if isinstance(content, str):
+        return content.strip()
+
+    if isinstance(content, list):
+        return "\n".join(
+            item.get("text", "")
+            for item in content
+            if isinstance(item, dict) and item.get("type") == "text"
+        ).strip()
+
+    return str(content)
+
+
 def create_roadmap(state: BizPilotState):
 
     print("Project Planner Agent is working...")
 
     business_analysis = str(
         state.get("business_analysis", {})
-    )[:700]
+    )[:900]
 
     solution_data = state.get("solution_architecture", {})
+
     solution = str(
         solution_data.get("solution", solution_data)
         if isinstance(solution_data, dict)
         else solution_data
-    )[:1400]
+    )[:2200]
 
     cost_data = state.get("cost_analysis", {})
+
     cost = str(
         cost_data.get("financial_analysis", cost_data)
         if isinstance(cost_data, dict)
         else cost_data
-    )[:700]
+    )[:1000]
 
     financial_validation = str(
         state.get("financial_validation", {})
-    )[:500]
+    )[:700]
 
     budget_amount = state.get("budget_amount", "Not provided")
     currency = state.get("currency", "INR")
@@ -36,8 +52,8 @@ def create_roadmap(state: BizPilotState):
     prompt = f"""
 You are an experienced Business Project Manager.
 
-Create a practical implementation roadmap using ONLY
-the proposed solution provided below.
+Create a realistic implementation roadmap for the customer's
+business using the information supplied below.
 
 BUSINESS:
 {state.get("business_name")}
@@ -49,7 +65,7 @@ BUSINESS SIZE:
 {state.get("business_size")}
 
 CUSTOMER PROBLEM:
-{str(state.get("business_problem", ""))[:500]}
+{str(state.get("business_problem", ""))[:600]}
 
 AVAILABLE BUDGET:
 {currency} {budget_amount}
@@ -60,7 +76,7 @@ BUDGET COVERAGE:
 BUSINESS ANALYSIS:
 {business_analysis}
 
-PROPOSED SOLUTION:
+SOLUTION ARCHITECTURE:
 {solution}
 
 COST ANALYSIS:
@@ -69,20 +85,24 @@ COST ANALYSIS:
 FINANCIAL VALIDATION:
 {financial_validation}
 
-IMPORTANT RULES:
+CORE RULES:
 
-1. Plan only the solution proposed by the Solution Architect.
-2. Do not introduce additional software, hardware or features.
-3. Do not invent customer counts, staff availability or infrastructure.
-4. Respect the budget and its coverage.
-5. Distinguish one-time costs from recurring costs.
-6. Do not invent vendor prices, savings or financial benefits.
-7. Mark unconfirmed requirements as dependencies.
-8. Use realistic indicative timelines.
-9. Include customer approval and staff training where relevant.
-10. Include appropriate testing before rollout.
-11. Do not claim legal, safety or regulatory compliance without verification.
-12. Do not repeat the business analysis or solution architecture.
+1. Plan only the primary solution proposed by the Solution Architect.
+2. Use the REQUIRED resources identified by the architect.
+3. Do not introduce additional software, hardware or features.
+4. Do not treat optional resources or alternatives as mandatory.
+5. Use the Cost Analyst's estimates. Do not create new prices.
+6. Respect the customer's budget and budget coverage.
+7. Distinguish one-time costs from recurring costs.
+8. Do not invent customer counts, staff availability,
+   infrastructure, savings or financial benefits.
+9. Mark unconfirmed requirements as dependencies.
+10. Use realistic indicative timelines, not guaranteed dates.
+11. Include customer approval and staff training where relevant.
+12. Include appropriate testing before rollout.
+13. Do not claim legal, safety or regulatory compliance
+    without appropriate verification.
+14. Do not repeat the business analysis or solution description.
 
 CREATE EXACTLY THREE PHASES:
 
@@ -90,7 +110,7 @@ CREATE EXACTLY THREE PHASES:
 ## Phase 2 – Core Implementation
 ## Phase 3 – Testing and Rollout
 
-For EACH phase include:
+FOR EACH PHASE INCLUDE:
 
 - Objective
 - Priority
@@ -108,33 +128,23 @@ ALSO INCLUDE:
 ## Risks and Contingency Plans
 ## Information Required Before Implementation
 
-FORMATTING RULES:
+FORMATTING:
 
-1. Use valid GitHub Flavored Markdown.
-2. Prefer headings and bullet points.
-3. Do not use Markdown tables.
-4. Keep the complete roadmap around 450-550 words.
-5. Complete all three phases.
-6. Never stop in the middle of a sentence or task.
-7. Clearly label indicative timelines and assumptions.
-8. Return only the implementation roadmap.
+- Use valid Markdown headings and bullet points.
+- Do not use Markdown tables.
+- Keep the roadmap concise, around 350-450 words.
+- Complete all three phases and all additional sections.
+- Clearly label indicative timelines and assumptions.
+- Never end in the middle of a sentence or task.
+- Return only the implementation roadmap.
 """
 
     response = llm.invoke(prompt)
-
-    roadmap = response.content
-
-    if isinstance(roadmap, list):
-        roadmap = "\n".join(
-            item.get("text", "")
-            for item in roadmap
-            if isinstance(item, dict)
-            and item.get("type") == "text"
-        )
+    roadmap = get_response_text(response.content)
 
     return {
         "project_roadmap": {
-            "roadmap": str(roadmap)
+            "roadmap": roadmap
         },
         "agent_logs": [
             {

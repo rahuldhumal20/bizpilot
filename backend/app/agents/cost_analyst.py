@@ -114,28 +114,37 @@ def analyze_cost(state: BizPilotState):
     print("Cost Analyst Agent is working...")
 
     solution_data = state.get("solution_architecture", {})
+
     solution = str(
         solution_data.get("solution", solution_data)
         if isinstance(solution_data, dict)
         else solution_data
-    )[:1800]
+    )[:2600]
 
     budget_amount = state.get("budget_amount", 0)
     currency = state.get("currency", "INR")
     budget_scope = state.get("budget_scope", "initial_only")
 
     prompt = f"""
-You are a careful business financial analyst.
+You are a careful and realistic Business Financial Analyst.
 
-Business: {state.get("business_name")}
-Industry: {state.get("industry")}
-Business size: {state.get("business_size")}
+Your task is to estimate the financial requirements of the
+solution designed by the Solution Architect.
 
-Available budget: {currency} {budget_amount}
-Budget scope: {budget_scope}
+BUSINESS:
+{state.get("business_name")}
 
-Use the following recommended solution as the SINGLE source
-for identifying required resources and estimating costs.
+INDUSTRY:
+{state.get("industry")}
+
+BUSINESS SIZE:
+{state.get("business_size")}
+
+CUSTOMER BUDGET:
+{currency} {budget_amount}
+
+BUDGET COVERAGE:
+{budget_scope}
 
 SOLUTION ARCHITECTURE:
 {solution}
@@ -157,22 +166,34 @@ Use exactly this structure:
   "financial_risks": []
 }}
 
-Rules:
+FINANCIAL ESTIMATION RULES:
 
-1. Estimate costs for ALL essential resources in the recommended solution.
-2. Do not add hardware, software or services not recommended
-   by the Solution Architect.
+1. Use the Solution Architect's REQUIRED resources as the basis
+   for the cost estimate.
+2. Do not add resources that are absent from the recommended
+   solution.
 3. Do not omit essential resources to make the estimate cheaper.
-4. Separate one-time initial costs from monthly recurring costs.
-5. Use the requested currency.
-6. All costs must be non-negative numbers.
-7. Minimum values must not exceed maximum values.
-8. Unknown annual benefits MUST be null, not zero.
-9. Never invent revenue, savings or customer numbers.
-10. Do not invent vendor quotations or guaranteed prices.
-11. Clearly label estimates as approximate.
-12. Keep assumptions and financial risks concise.
-13. Return complete valid JSON.
+4. Do not include OPTIONAL resources in the required estimate.
+   Mention their possible financial impact in assumptions if relevant.
+5. Do not estimate alternative solutions as if they were selected.
+6. Separate one-time initial costs from monthly recurring costs.
+7. Use the customer's requested currency.
+8. Provide realistic indicative ranges, not false precision.
+9. Do not invent vendor quotations or claim that estimates
+   are verified market prices.
+10. Clearly mention when local quotations or supplier confirmation
+    are required.
+11. Do not invent revenue, savings, customer counts or growth.
+12. If annual benefits cannot be reasonably calculated from
+    supplied business information, both annual benefit fields
+    MUST be null.
+13. Unknown benefits must never be represented as zero.
+14. All costs must be non-negative numbers.
+15. Minimum values must not exceed maximum values.
+16. Consider whether the budget covers initial costs only
+    or the entire first year.
+17. Keep assumptions and financial risks concise.
+18. Return complete valid JSON with every required field.
 """
 
     data = None
@@ -186,13 +207,10 @@ Rules:
             response = llm.invoke(prompt)
 
             raw_response = get_response_text(response.content)
-
             data = extract_json(raw_response)
-
             data = validate_response(data, currency)
 
             print("Financial data validated successfully.")
-
             break
 
         except Exception as error:
